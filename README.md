@@ -15,8 +15,8 @@ data.
 
 To run:  
 `> ./stereo_calb -w <X> -h <Y> <pics.xml>`  
-Where `<X>` is the number of checkerboard intersections on the x-axis,  
-and `<Y>` is the number of checkerboard intersections in the y-axis,  
+Where `<X>` is the number of checkerboard intersections along the x-axis,  
+and `<Y>` is the number of checkerboard intersections along the y-axis,  
 and `<pics.xml>` is an xml file that specifies the desired calibration photos
 which should be used.
 
