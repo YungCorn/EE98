@@ -22,6 +22,14 @@
      GitHub:        https://github.com/Itseez/opencv/
    ************************************************** */
 
+/* **************************************************
+   May 8, 2014
+
+   This code has been edited by Cornell Wilson and Bradley Frizzell for use in
+   their senior design project for Tufts University.
+
+   ************************************************** */
+
 #include "opencv2/calib3d/calib3d.hpp"
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
@@ -49,13 +57,13 @@ static int print_help()
             "         matrix separately) stereo. \n"
             " Calibrate the cameras and display the\n"
             " rectified results along with the computed disparity images.   \n" << endl;
-    cout << "Usage:\n ./stereo_calib -w board_width -h board_height [-nr /*dot not view results*/] <image list XML/YML file>\n" << endl;
+    cout << "Usage:\n ./stereo_calib -w board_width -h board_height -s square_size [-nr /*dot not view results*/] <image list XML/YML file>\n" << endl;
     return 0;
 }
 
 
 static void
-StereoCalib(const vector<string>& imagelist, Size boardSize, bool useCalibrated=true, bool showRectified=true)
+StereoCalib(const vector<string>& imagelist, Size boardSize, const float squareSize, bool useCalibrated=true, bool showRectified=true)
 {
     if( imagelist.size() % 2 != 0 )
     {
@@ -65,7 +73,7 @@ StereoCalib(const vector<string>& imagelist, Size boardSize, bool useCalibrated=
 
     bool displayCorners = false;//true;
     const int maxScale = 2;
-    const float squareSize = 63.5;  // SET THIS TO ACTUAL SQUARE SIZE!!!!!
+    //const float squareSize = 63.5;  // SET THIS TO ACTUAL SQUARE SIZE!!!!!
     // ARRAY AND VECTOR STORAGE:
 
     vector<vector<Point2f> > imagePoints[2];
@@ -373,6 +381,7 @@ static bool readStringList( const string& filename, vector<string>& l )
 int main(int argc, char** argv)
 {
     Size boardSize;
+    float squareSize = 0;
     string imagelistfn;
     bool showRectified = true;
 
@@ -395,6 +404,14 @@ int main(int argc, char** argv)
                 return print_help();
             }
         }
+        else if( string(argv[i]) == "-s" )
+        {
+            if( sscanf(argv[++i], "%f", &squareSize) != 1 || squareSize <= 0)
+            {
+                cout << "invalid square size" << endl;
+                return print_help();
+            }
+        }
         else if( string(argv[i]) == "-nr" )
             showRectified = false;
         else if( string(argv[i]) == "--help" )
@@ -413,9 +430,10 @@ int main(int argc, char** argv)
         imagelistfn = "stereo_calib.xml";
         boardSize = Size(9, 6);
     }
-    else if( boardSize.width <= 0 || boardSize.height <= 0 )
+    else if( boardSize.width <= 0 || boardSize.height <= 0 || squareSize <= 0)
     {
-        cout << "if you specified XML file with chessboards, you should also specify the board width and height (-w and -h options)" << endl;
+        cout << "if you specified XML file with chessboards, you should also specify the board"  << 
+                    endl << "width, board height and the square size (-w, -h, and -s options)" << endl;
         return 0;
     }
 
@@ -427,6 +445,6 @@ int main(int argc, char** argv)
         return print_help();
     }
 
-    StereoCalib(imagelist, boardSize, true, showRectified);
+    StereoCalib(imagelist, boardSize, squareSize, true, showRectified);
     return 0;
 }
