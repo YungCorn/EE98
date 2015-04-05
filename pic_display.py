@@ -3,12 +3,18 @@ from tkFileDialog import askopenfilename
 from time import sleep
 import Image
 import ImageTk
+import math
+import os
 
-canvas_width = 1260
-canvas_height = 787
 
-left_pic = "user_pictures/left.png"
-right_pic = "user_pictures/right.png"
+pic_width = 1680
+pic_height = 1050
+scaling_factor = 0.7
+canvas_width = int(pic_width * scaling_factor)
+canvas_height = int(pic_height * scaling_factor)
+
+left_pic = "leftRect.png"
+right_pic = "rightRect.png"
 root = Tk()
 canvas = Canvas(root, width=canvas_width, height=canvas_height)
 canvas.pack()
@@ -18,6 +24,10 @@ image_list = [] #list of all images
 on_right_pic = False # True when user should still be displayed the left pic
 next_button = False # True when 'next image' button is being displayed
 
+try:
+    os.remove("user_pictures_rect/coords.txt")
+except:
+    pass
 
 def display_start_screen():
     canvas.create_rectangle(430, 300, 830, 500, fill="blue", tags = 'take_pic')
@@ -51,14 +61,18 @@ def click_handler(event):
     global next_button
     global on_right_pic 
     
-    print next_button
-    
     if(next_button == False):   
         # only allows points to be placed when there is not a button on screen  
         canvas.create_rectangle(event.x-5, event.y-5, event.x+5, event.y+5,\
                             fill="green", tags=("point%d"%num_points))
-        print (event.x,event.y)
         num_points = num_points+1    
+        print (event.x/scaling_factor,event.y/scaling_factor)
+        x_coord = int(round(event.x/scaling_factor))
+        y_coord = int(round(event.y/scaling_factor))
+        with open("user_pictures_rect/coords.txt", "a") as coords_file:
+            coords_file.write("%s "%x_coord)
+            coords_file.write("%s "%y_coord)
+        
     
     if(next_button == True):
         if((event.x < (canvas_width/2 + 150)) and (event.x > (canvas_width/2 - 150)) and\
@@ -69,6 +83,7 @@ def click_handler(event):
             on_right_pic = True
             num_points = 0
             display_right_image()
+
             
     # This displays the 'next' button when the first two points on photo1 have been selected
     if(num_points==2): 
