@@ -22,6 +22,14 @@
      GitHub:        https://github.com/Itseez/opencv/
    ************************************************** */
 
+/* **************************************************
+   May 8, 2014
+
+   This code has been edited by Cornell Wilson and Bradley Frizzell for use in
+   their senior design project for Tufts University.
+
+   ************************************************** */
+
 #include "opencv2/calib3d/calib3d.hpp"
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
@@ -41,21 +49,18 @@ using namespace std;
 static int print_help()
 {
     cout <<
-            " Given a list of chessboard images, the number of corners (nx, ny)\n"
-            " on the chessboards, and a flag: useCalibrated for \n"
-            "   calibrated (0) or\n"
-            "   uncalibrated \n"
-            "     (1: use cvStereoCalibrate(), 2: compute fundamental\n"
-            "         matrix separately) stereo. \n"
-            " Calibrate the cameras and display the\n"
-            " rectified results along with the computed disparity images.   \n" << endl;
-    cout << "Usage:\n ./stereo_calib -w board_width -h board_height [-nr /*dot not view results*/] <image list XML/YML file>\n" << endl;
+            " Given a list of checkerboard images, the number of corners (nx, ny)\n"
+            " on the checkerboards, and the checker size:\n"
+            " Calibrate the cameras and display the rectified results along with the\n"
+            " computed disparity images.\n" << endl;
+    cout << "Usage:\n ./stereo_calib -w <board width> -h <board height> -s <square size>\n\t[-nr /*dot not view results*/] <image list XML/YML file>\n" << endl;
+    cout << " *<board height> and <board width> are in units of checker intersections" << endl;
     return 0;
 }
 
 
-static void
-StereoCalib(const vector<string>& imagelist, Size boardSize, bool useCalibrated=true, bool showRectified=true)
+static void StereoCalib(const vector<string>& imagelist, Size boardSize,
+                        const float squareSize, bool showRectified=true)
 {
     if( imagelist.size() % 2 != 0 )
     {
@@ -65,7 +70,6 @@ StereoCalib(const vector<string>& imagelist, Size boardSize, bool useCalibrated=
 
     bool displayCorners = false;//true;
     const int maxScale = 2;
-    const float squareSize = 63.5;  // SET THIS TO ACTUAL SQUARE SIZE!!!!!
     // ARRAY AND VECTOR STORAGE:
 
     vector<vector<Point2f> > imagePoints[2];
@@ -254,32 +258,6 @@ StereoCalib(const vector<string>& imagelist, Size boardSize, bool useCalibrated=
                   imageSize, R, T, R1, R2, P1, P2, Q,
                   CV_CALIB_ZERO_DISPARITY, 1, imageSize, &validRoi[0], &validRoi[1]);
 
-    float x1 = 919, y1 = 507;
-    float dif1 = x1 - 890;
-    float x2 = 924, y2 = 776;
-    float dif2 = x2 - 894;
-
-    Mat Disp = Mat::zeros(1920, 1080, CV_32FC1);
-    Disp.at<float>(Point(x1, y1)) = dif1;
-    Disp.at<float>(Point(x2, y2)) = dif2;
-    Mat Coords(1920, 1080, CV_32FC3, Scalar(0, 0, 0));
-    reprojectImageTo3D(Disp, Coords, Q);
-    float xval1 = Coords.at<Vec3f>(Point(x1, y1))[0];
-    float yval1 = Coords.at<Vec3f>(Point(x1, y1))[1];
-    float zval1 = Coords.at<Vec3f>(Point(x1, y1))[2];
-    float xval2 = Coords.at<Vec3f>(Point(x2, y2))[0];
-    float yval2 = Coords.at<Vec3f>(Point(x2, y2))[1];
-    float zval2 = Coords.at<Vec3f>(Point(x2, y2))[2];
-    //float xval3 = Coords.at<Vec3f>(Point(190, 301))[0];
-    //float yval3 = Coords.at<Vec3f>(Point(190, 301))[1];
-    //float zval3 = Coords.at<Vec3f>(Point(190, 301))[2];
-    cout << "(x1, y1, z1) = " << endl << "(" << xval1 << ", " << yval1 << ", " << zval1 << ")" << endl << endl;
-    cout << "(x2, y2, z2) = " << endl << "(" << xval2 << ", " << yval2 << ", " << zval2 << ")" << endl << endl;
-    //cout << "(x3, y3, z3) = " << endl << "(" << xval3 << ", " << yval3 << ", " << zval3 << ")" << endl << endl;
-
-    float distance = sqrt( pow((xval1-xval2), 2) + pow((yval1-yval2), 2) + pow((zval1-zval2), 2) );
-    cout << "Distance = " << distance << "mm\n\n";
-
     fs.open("extrinsics.yml", CV_STORAGE_WRITE);
     if( fs.isOpened() )
     {
@@ -287,7 +265,7 @@ StereoCalib(const vector<string>& imagelist, Size boardSize, bool useCalibrated=
         fs.release();
     }
     else
-        cout << "Error: can not save the intrinsic parameters\n";
+        cout << "Error: can not save the extrinsic parameters\n";
 
     // OpenCV can handle left-right
     // or up-down camera arrangements
@@ -298,32 +276,6 @@ StereoCalib(const vector<string>& imagelist, Size boardSize, bool useCalibrated=
         return;
 
     Mat rmap[2][2];
-// IF BY CALIBRATED (BOUGUET'S METHOD)
-    if( useCalibrated )
-    {
-        // we already computed everything
-    }
-// OR ELSE HARTLEY'S METHOD
-    else
- // use intrinsic parameters of each camera, but
- // compute the rectification transformation directly
- // from the fundamental matrix
-    {
-        vector<Point2f> allimgpt[2];
-        for( k = 0; k < 2; k++ )
-        {
-            for( i = 0; i < nimages; i++ )
-                std::copy(imagePoints[k][i].begin(), imagePoints[k][i].end(), back_inserter(allimgpt[k]));
-        }
-        F = findFundamentalMat(Mat(allimgpt[0]), Mat(allimgpt[1]), FM_8POINT, 0, 0);
-        Mat H1, H2;
-        stereoRectifyUncalibrated(Mat(allimgpt[0]), Mat(allimgpt[1]), F, imageSize, H1, H2, 3);
-
-        R1 = cameraMatrix[0].inv()*H1*cameraMatrix[0];
-        R2 = cameraMatrix[1].inv()*H2*cameraMatrix[1];
-        P1 = cameraMatrix[0];
-        P2 = cameraMatrix[1];
-    }
 
     //Precompute maps for cv::remap()
     initUndistortRectifyMap(cameraMatrix[0], distCoeffs[0], R1, P1, imageSize, CV_16SC2, rmap[0][0], rmap[0][1]);
@@ -353,18 +305,15 @@ StereoCalib(const vector<string>& imagelist, Size boardSize, bool useCalibrated=
         {
             Mat img = imread(goodImageList[i*2+k], 0), rimg, cimg;
             remap(img, rimg, rmap[k][0], rmap[k][1], CV_INTER_LINEAR);
-            char buf[100];
-            sprintf(buf, "%dimg%d.png", i, k);
-            imwrite(buf, rimg);
+            //char buf[100];
+            //sprintf(buf, "%dimg%d.png", i, k);
+            //imwrite(buf, rimg);
             cvtColor(rimg, cimg, COLOR_GRAY2BGR);
             Mat canvasPart = !isVerticalStereo ? canvas(Rect(w*k, 0, w, h)) : canvas(Rect(0, h*k, w, h));
             resize(cimg, canvasPart, canvasPart.size(), 0, 0, CV_INTER_AREA);
-            if( useCalibrated )
-            {
-                Rect vroi(cvRound(validRoi[k].x*sf), cvRound(validRoi[k].y*sf),
-                          cvRound(validRoi[k].width*sf), cvRound(validRoi[k].height*sf));
-                rectangle(canvasPart, vroi, Scalar(0,0,255), 3, 8);
-            }
+            Rect vroi(cvRound(validRoi[k].x*sf), cvRound(validRoi[k].y*sf),
+                      cvRound(validRoi[k].width*sf), cvRound(validRoi[k].height*sf));
+            rectangle(canvasPart, vroi, Scalar(0,0,255), 3, 8);
         }
 
         if( !isVerticalStereo )
@@ -399,10 +348,10 @@ static bool readStringList( const string& filename, vector<string>& l )
 int main(int argc, char** argv)
 {
     Size boardSize;
+    float squareSize = 0;
     string imagelistfn;
     bool showRectified = true;
 
-    //Board size is in units of checker intersections
     for( int i = 1; i < argc; i++ )
     {
         if( string(argv[i]) == "-w" )
@@ -421,14 +370,22 @@ int main(int argc, char** argv)
                 return print_help();
             }
         }
+        else if( string(argv[i]) == "-s" )
+        {
+            if( sscanf(argv[++i], "%f", &squareSize) != 1 || squareSize <= 0)
+            {
+                cout << "invalid square size" << endl;
+                return print_help();
+            }
+        }
         else if( string(argv[i]) == "-nr" )
             showRectified = false;
         else if( string(argv[i]) == "--help" )
             return print_help();
         else if( argv[i][0] == '-' )
         {
-            cout << "invalid option " << argv[i] << endl;
-            return 0;
+            cout << "invalid option " << argv[i] << endl << endl;
+            return print_help();
         }
         else
             imagelistfn = argv[i];
@@ -438,10 +395,12 @@ int main(int argc, char** argv)
     {
         imagelistfn = "stereo_calib.xml";
         boardSize = Size(9, 6);
+        squareSize = 1.f;
     }
-    else if( boardSize.width <= 0 || boardSize.height <= 0 )
+    else if( boardSize.width <= 0 || boardSize.height <= 0 || squareSize <= 0)
     {
-        cout << "if you specified XML file with chessboards, you should also specify the board width and height (-w and -h options)" << endl;
+        cout << "if you specified XML file with chessboards, you should also specify the board"  << 
+                    endl << "width, board height and the square size (-w, -h, and -s options)" << endl;
         return 0;
     }
 
@@ -453,6 +412,6 @@ int main(int argc, char** argv)
         return print_help();
     }
 
-    StereoCalib(imagelist, boardSize, true, showRectified);
+    StereoCalib(imagelist, boardSize, squareSize, showRectified);
     return 0;
 }
