@@ -5,6 +5,7 @@ import Image
 import ImageTk
 import math
 import os
+import sys
 
 
 pic_width = 1680
@@ -18,11 +19,14 @@ right_pic = "rightRect.png"
 root = Tk()
 canvas = Canvas(root, width=canvas_width, height=canvas_height)
 canvas.pack()
+
 num_points = 0;
 image_list = [] #list of all images
-
 on_right_pic = False # True when user should still be displayed the left pic
 next_button = False # True when 'next image' button is being displayed
+previous_point = [0]*2 # Holds the coordinate of the last placed point
+is_second_point = False # True when the current point being placed is the second point of
+                        # the distance measurement
 
 try:
     os.remove("user_pictures_rect/coords.txt")
@@ -48,6 +52,8 @@ def display_image():
     
     
 def display_right_image():
+    global on_right_pic
+    on_right_pic = True
     imageR = Image.open(right_pic)
     imageR = imageR.resize((canvas_width, canvas_height), Image.ANTIALIAS)
     img = ImageTk.PhotoImage(imageR)
@@ -59,13 +65,26 @@ def display_right_image():
 def click_handler(event):
     global num_points
     global next_button
-    global on_right_pic 
+    global on_right_pic
+    global previous_point
+    global is_second_point
     
     if(next_button == False):   
         # only allows points to be placed when there is not a button on screen  
         canvas.create_rectangle(event.x-5, event.y-5, event.x+5, event.y+5,\
                             fill="green", tags=("point%d"%num_points))
-        num_points = num_points+1    
+        num_points = num_points+1   
+        if(is_second_point == True):
+            print "placing pt 2"
+            canvas.create_line(previous_point[0], previous_point[1], event.x, event.y,\
+                                fill="red", tags="line")
+            is_second_point = False
+        else:
+            print "Placing pt 1"
+            previous_point[0] = event.x
+            previous_point[1] = event.y
+            is_second_point = True
+         
         print (event.x/scaling_factor,event.y/scaling_factor)
         x_coord = int(round(event.x/scaling_factor))
         y_coord = int(round(event.y/scaling_factor))
@@ -80,9 +99,12 @@ def click_handler(event):
             canvas.delete("all")
             canvas.delete("left_image")
             next_button = False
-            on_right_pic = True
             num_points = 0
-            display_right_image()
+            
+            if(on_right_pic == False):
+                display_right_image()
+            else:
+                sys.exit()
 
             
     # This displays the 'next' button when the first two points on photo1 have been selected
@@ -91,13 +113,14 @@ def click_handler(event):
                                 (canvas_width/2 + 150), (canvas_height/2 + 50),\
                                 fill="red", tags=("next"))
         next_button = True
-
+        if(on_right_pic == False):
+            canvas.create_text(canvas_width/2, canvas_height/2, font=("Purisa",25),\
+                                fill="white", text= "Next Picture")
+        if(on_right_pic == True):
+            canvas.create_text(canvas_width/2, canvas_height/2, font=("Purisa",25),\
+                                fill="white", text= "Get Distance")
 
     
-    
-     #canvas.delete("point0", "point1")
-        #display_right_image()
-        #num_points = 0
 
 
 display_image()
