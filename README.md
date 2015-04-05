@@ -25,9 +25,11 @@ The purpose of this program is to find the real world distance between two
 points in a stereo image.
 
 To run:  
-`> ./find_dist <extrinsics.yml> <L1x> <L1y> <R1x> <R1y> <L2x> <L2y> <R2x> <R2y>`  
+`> ./find_dist <extrinsics.yml> <width> <height> <L1x> <L1y> <R1x> <R1y> <L2x> <L2y> <R2x> <R2y>`  
 Where `<extrinsics.yml>` is a yaml file that contains the extrinsic data
 generated from stereo_calib,  
+and `<width>` is the width of the images in pixels,  
+and `<height>` is the height of the images in pixels,
 and `<L1x>`is the x-coordinate of the first point in the left photo,  
 and `<L1y>`is the y-coordinate of the first point in the left photo,  
 and `<R1x>`is the x-coordinate of the first point in the right photo,  
