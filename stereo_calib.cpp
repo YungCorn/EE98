@@ -254,32 +254,6 @@ StereoCalib(const vector<string>& imagelist, Size boardSize, bool useCalibrated=
                   imageSize, R, T, R1, R2, P1, P2, Q,
                   CV_CALIB_ZERO_DISPARITY, 1, imageSize, &validRoi[0], &validRoi[1]);
 
-    float x1 = 919, y1 = 507;
-    float dif1 = x1 - 890;
-    float x2 = 924, y2 = 776;
-    float dif2 = x2 - 894;
-
-    Mat Disp = Mat::zeros(1920, 1080, CV_32FC1);
-    Disp.at<float>(Point(x1, y1)) = dif1;
-    Disp.at<float>(Point(x2, y2)) = dif2;
-    Mat Coords(1920, 1080, CV_32FC3, Scalar(0, 0, 0));
-    reprojectImageTo3D(Disp, Coords, Q);
-    float xval1 = Coords.at<Vec3f>(Point(x1, y1))[0];
-    float yval1 = Coords.at<Vec3f>(Point(x1, y1))[1];
-    float zval1 = Coords.at<Vec3f>(Point(x1, y1))[2];
-    float xval2 = Coords.at<Vec3f>(Point(x2, y2))[0];
-    float yval2 = Coords.at<Vec3f>(Point(x2, y2))[1];
-    float zval2 = Coords.at<Vec3f>(Point(x2, y2))[2];
-    //float xval3 = Coords.at<Vec3f>(Point(190, 301))[0];
-    //float yval3 = Coords.at<Vec3f>(Point(190, 301))[1];
-    //float zval3 = Coords.at<Vec3f>(Point(190, 301))[2];
-    cout << "(x1, y1, z1) = " << endl << "(" << xval1 << ", " << yval1 << ", " << zval1 << ")" << endl << endl;
-    cout << "(x2, y2, z2) = " << endl << "(" << xval2 << ", " << yval2 << ", " << zval2 << ")" << endl << endl;
-    //cout << "(x3, y3, z3) = " << endl << "(" << xval3 << ", " << yval3 << ", " << zval3 << ")" << endl << endl;
-
-    float distance = sqrt( pow((xval1-xval2), 2) + pow((yval1-yval2), 2) + pow((zval1-zval2), 2) );
-    cout << "Distance = " << distance << "mm\n\n";
-
     fs.open("extrinsics.yml", CV_STORAGE_WRITE);
     if( fs.isOpened() )
     {
@@ -287,7 +261,7 @@ StereoCalib(const vector<string>& imagelist, Size boardSize, bool useCalibrated=
         fs.release();
     }
     else
-        cout << "Error: can not save the intrinsic parameters\n";
+        cout << "Error: can not save the extrinsic parameters\n";
 
     // OpenCV can handle left-right
     // or up-down camera arrangements
@@ -353,9 +327,9 @@ StereoCalib(const vector<string>& imagelist, Size boardSize, bool useCalibrated=
         {
             Mat img = imread(goodImageList[i*2+k], 0), rimg, cimg;
             remap(img, rimg, rmap[k][0], rmap[k][1], CV_INTER_LINEAR);
-            char buf[100];
-            sprintf(buf, "%dimg%d.png", i, k);
-            imwrite(buf, rimg);
+            //char buf[100];
+            //sprintf(buf, "%dimg%d.png", i, k);
+            //imwrite(buf, rimg);
             cvtColor(rimg, cimg, COLOR_GRAY2BGR);
             Mat canvasPart = !isVerticalStereo ? canvas(Rect(w*k, 0, w, h)) : canvas(Rect(0, h*k, w, h));
             resize(cimg, canvasPart, canvasPart.size(), 0, 0, CV_INTER_AREA);
