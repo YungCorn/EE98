@@ -23,6 +23,7 @@ canvas.pack()
 num_points = 0;
 image_list = [] #list of all images
 on_right_pic = False # True when user should still be displayed the left pic
+on_start_screen = True # True when on the start screen with the instructions
 next_button = False # True when 'next image' button is being displayed
 previous_point = [0]*2 # Holds the coordinate of the last placed point
 is_second_point = False # True when the current point being placed is the second point of
@@ -34,21 +35,35 @@ except:
     pass
 
 def display_start_screen():
-    canvas.create_rectangle(430, 300, 830, 500, fill="blue", tags = 'take_pic')
+    canvas.create_text( canvas_width/2,
+                        canvas_height/2,
+                        font=("Purisa",25),
+                        fill="black",
+                        text=   "You will now be shown two pictures out of a stereo pair\n"
+                                "of images. By clicking on the picture, you will be able to\n"
+                                "define the start and end points of a measurement you desire.\n"
+                                "In each of the two pictures, be careful to select the exact same\n"
+                                "points of interest in the same order each time.")
+    canvas.create_rectangle(canvas_width/2 - 100,
+                            canvas_height/2 + 100,
+                            canvas_width/2 + 100, 
+                            canvas_height/2 + 200,
+                            fill="blue", 
+                            tags = 'take_pic')
+    canvas.create_text( canvas_width/2,
+                        canvas_height/2+150,
+                        font=("Purisa",25),
+                        fill="white",
+                        text= "Begin")
+    canvas.bind("<Button 1>",click_handler)
     
 
 def display_image():
     image = Image.open(left_pic)
     image = image.resize((canvas_width, canvas_height), Image.ANTIALIAS)
     img = ImageTk.PhotoImage(image)
-    
     image_list.append(img)
-
     canvas.create_image(0,0,image=img,anchor="nw", tags="left_image")
-    
-    canvas.bind("<Button 1>",click_handler)
-    
-    root.mainloop()
     
     
 def display_right_image():
@@ -68,6 +83,17 @@ def click_handler(event):
     global on_right_pic
     global previous_point
     global is_second_point
+    global on_start_screen
+    
+    if(on_start_screen):
+        if( (event.x < canvas_width/2 + 100) and 
+            (event.x > (canvas_width/2 - 100)) and
+            (event.y < (canvas_height/2 + 200)) and 
+            (event.y > (canvas_height/2 + 100))):
+            on_start_screen = False
+            canvas.delete("all")
+            display_image()
+        return
     
     if(next_button == False):   
         # only allows points to be placed when there is not a button on screen  
@@ -122,5 +148,6 @@ def click_handler(event):
 
     
 
-
-display_image()
+display_start_screen()
+#display_image()
+root.mainloop() # this is what actually runs the tkinter stuff
