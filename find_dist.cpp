@@ -2,6 +2,7 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <fstream>
 
 using namespace cv;
 using namespace std;
@@ -45,7 +46,12 @@ int main(int argc, char** argv)
 
         float distance = sqrt( pow((xvalA-xvalB), 2) + pow((yvalA-yvalB), 2) +
                                 pow((zvalA-zvalB), 2) );
+
+        ofstream distance_file;
+        distance_file.open("distance.txt");
         cout << "Distance = " << distance << "mm\n\n";
+        distance_file << distance;
+        distance_file.close();
 
         return 0;
     }
