@@ -2,6 +2,7 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <fstream>
 
 using namespace cv;
 using namespace std;
@@ -69,7 +70,11 @@ int main(int argc, char** argv)
                                 pow((zvalA-zvalB), 2) );
 
         // Output distance
+        ofstream distance_file;
+        distance_file.open("distance.txt");
         cout << "Distance = " << distance << "mm\n\n";
+        distance_file << distance;
+        distance_file.close();
 
         return 0;
     }
