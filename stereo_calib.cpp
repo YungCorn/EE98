@@ -68,7 +68,7 @@ static void StereoCalib(const vector<string>& imagelist, Size boardSize,
         return;
     }
 
-    bool displayCorners = false;//true;
+    bool displayCorners = false;
     const int maxScale = 2;
     // ARRAY AND VECTOR STORAGE:
 
@@ -126,6 +126,9 @@ static void StereoCalib(const vector<string>& imagelist, Size boardSize,
                 Mat cimg, cimg1;
                 cvtColor(img, cimg, COLOR_GRAY2BGR);
                 drawChessboardCorners(cimg, boardSize, corners, found);
+                //char buf[100];
+                //sprintf(buf, "%dCalibImg%d.png", i, k);
+                //imwrite(buf, cimg);
                 double sf = 640./MAX(img.rows, img.cols);
                 resize(cimg, cimg1, Size(), sf, sf);
                 imshow("corners", cimg1);
@@ -306,7 +309,7 @@ static void StereoCalib(const vector<string>& imagelist, Size boardSize,
             Mat img = imread(goodImageList[i*2+k], 0), rimg, cimg;
             remap(img, rimg, rmap[k][0], rmap[k][1], CV_INTER_LINEAR);
             //char buf[100];
-            //sprintf(buf, "%dimg%d.png", i, k);
+            //sprintf(buf, "%dRectImg%d.png", i, k);
             //imwrite(buf, rimg);
             cvtColor(rimg, cimg, COLOR_GRAY2BGR);
             Mat canvasPart = !isVerticalStereo ? canvas(Rect(w*k, 0, w, h)) : canvas(Rect(0, h*k, w, h));
@@ -322,6 +325,9 @@ static void StereoCalib(const vector<string>& imagelist, Size boardSize,
         else
             for( j = 0; j < canvas.cols; j += 16 )
                 line(canvas, Point(j, 0), Point(j, canvas.rows), Scalar(0, 255, 0), 1, 8);
+        char buf[100];
+        sprintf(buf, "%dRectImg.png", i);
+        imwrite(buf, canvas);
         imshow("rectified", canvas);
         char c = (char)waitKey();
         if( c == 27 || c == 'q' || c == 'Q' )

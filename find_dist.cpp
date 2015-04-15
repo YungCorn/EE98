@@ -6,6 +6,23 @@
 using namespace cv;
 using namespace std;
 
+/* This program calculates the real-world distance between two points in a pair
+ * of rectified stereo images.
+ *
+ * It takes in an extrinsic camera parameters yaml file, the width of the
+ * images in pixels, and the height of the images in pixels. Then it takes in
+ * all of the point information in this order:
+ *      Left image, point 1, x-coordinate
+ *      Left image, point 1, y-coordinate
+ *      Right image, point 1, x-coordinate
+ *      Right image, point 1, y-coordinate
+ *      Left image, point 2, x-coordinate
+ *      Left image, point 2, y-coordinate
+ *      Right image, point 2, x-coordinate
+ *      Right image, point 2, y-coordinate
+ * 
+ * It prints the real-world distance between the two points to the console
+ */
 int main(int argc, char** argv)
 {
     if(argc == 12) {
@@ -13,6 +30,7 @@ int main(int argc, char** argv)
         int width, height;
         int Ax1, Ay1, Ax2, Ay2, Bx1, By1, Bx2, By2;
         
+        // Take in all arguments
         width = atoi(argv[2]);
         height = atoi(argv[3]);
         Ax1 = atoi(argv[4]);
@@ -24,13 +42,16 @@ int main(int argc, char** argv)
         Bx2 = atoi(argv[10]);
         By2 = atoi(argv[11]);
 
+        // Read in 'Q' matrix from the extrinsic paramenters file
         FileStorage exts(fname, FileStorage::READ);
         Mat Q;
         exts["Q"] >> Q;
 
+        // Calculate disparity between the given points
         float dispA = Ax1 - Ax2;
         float dispB = Bx1 - Bx2;
 
+        // Find real-world (x,y,z) coordinates of the two points
         Mat Disp = Mat::zeros(width, height, CV_32FC1);
         Disp.at<float>(Point(Ax1, Ay1)) = dispA;
         Disp.at<float>(Point(Bx1, By1)) = dispB;
@@ -43,8 +64,11 @@ int main(int argc, char** argv)
         float yvalB = Coords.at<Vec3f>(Point(Bx1, By1))[1];
         float zvalB = Coords.at<Vec3f>(Point(Bx1, By1))[2];
 
+        // Use (x,y,z) coordinates to calculate distance
         float distance = sqrt( pow((xvalA-xvalB), 2) + pow((yvalA-yvalB), 2) +
                                 pow((zvalA-zvalB), 2) );
+
+        // Output distance
         cout << "Distance = " << distance << "mm\n\n";
 
         return 0;
