@@ -18,7 +18,7 @@ using namespace std;
  * It saves two images to the directory in which it was run:
  *      leftRect.png
  *      rightRect.png
- * These are the rectified versions of the images that were passed in
+ * These are the rectified versions of the images that were passed in.
  */
 int main(int argc, char** argv)
 {
