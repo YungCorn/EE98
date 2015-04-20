@@ -43,6 +43,9 @@ int main(int argc, char** argv)
         Bx2 = atoi(argv[10]);
         By2 = atoi(argv[11]);
 
+// Primary method of calculating distance using reprojectImageTo3d
+//---------------------------------------------------------------------------//
+
         // Read in 'Q' matrix from the extrinsic paramenters file
         FileStorage exts(fname, FileStorage::READ);
         Mat Q;
@@ -76,6 +79,52 @@ int main(int argc, char** argv)
         distance_file << distance;
         distance_file.close();
 
+// Secondary method of calculating distance using triangulatePoints
+//---------------------------------------------------------------------------//
+//  for whatever reason, this method seems to be worse than the previous
+
+        // Read in projection matrices 
+        Mat P1, P2;
+        exts["P1"] >> P1;
+        exts["P2"] >> P2;
+
+        // Create matrices of corresponding points
+        Mat leftPoints = (Mat_<float>(2,2) << Ax1, Bx1, Ay1, By1);
+        Mat rightPoints = (Mat_<float>(2,2) << Ax2, Bx2, Ay2, By2);
+
+        // Find homogeneous coordinates of the two points
+        Mat hPoints, pointsH(1, 2, CV_32FC4);
+        triangulatePoints(P1, P2, leftPoints, rightPoints, hPoints);
+
+        // Convert homogeneous coordinates into (x, y, z) coordinates
+        pointsH.at<Vec4f>(0,0)[0] = hPoints.at<float>(0,0);
+        pointsH.at<Vec4f>(0,0)[1] = hPoints.at<float>(1,0);
+        pointsH.at<Vec4f>(0,0)[2] = hPoints.at<float>(2,0);
+        pointsH.at<Vec4f>(0,0)[3] = hPoints.at<float>(3,0);
+        pointsH.at<Vec4f>(0,1)[0] = hPoints.at<float>(0,1);
+        pointsH.at<Vec4f>(0,1)[1] = hPoints.at<float>(1,1);
+        pointsH.at<Vec4f>(0,1)[2] = hPoints.at<float>(2,1);
+        pointsH.at<Vec4f>(0,1)[3] = hPoints.at<float>(3,1);
+        Mat points3D;
+        convertPointsFromHomogeneous(pointsH, points3D);
+
+        // Use (x, y, z) coordinates to calculate distance
+        float xval1 = points3D.at<Vec3f>(0, 0)[0];
+        float yval1 = points3D.at<Vec3f>(0, 0)[1];
+        float zval1 = points3D.at<Vec3f>(0, 0)[2];
+        float xval2 = points3D.at<Vec3f>(0, 1)[0];
+        float yval2 = points3D.at<Vec3f>(0, 1)[1];
+        float zval2 = points3D.at<Vec3f>(0, 1)[2];
+        float newDist = sqrt( pow((xval1-xval2), 2) + pow((yval1-yval2), 2) +
+                                pow((zval1-zval2), 2) );
+
+        // Output distance
+        cout << "Alternate Distance = " << newDist << "mm\n\n";
+
+//---------------------------------------------------------------------------//
+
+        // Clean up
+        exts.release();
         return 0;
     }
     else {
