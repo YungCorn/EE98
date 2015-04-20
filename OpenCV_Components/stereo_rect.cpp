@@ -18,7 +18,7 @@ using namespace std;
  * It saves two images to the directory in which it was run:
  *      leftRect.png
  *      rightRect.png
- * These are the rectified versions of the images that were passed in
+ * These are the rectified versions of the images that were passed in.
  */
 int main(int argc, char** argv)
 {
@@ -67,8 +67,8 @@ int main(int argc, char** argv)
         remap(rightImg, rightRect, rmap[1][0], rmap[1][1], CV_INTER_LINEAR);
 
         // Store the rectified images
-        imwrite("../user_pictures_rect/leftRect.png", leftRect);
-        imwrite("../user_pictures_rect/rightRect.png", rightRect);
+        imwrite("leftRect.png", leftRect);
+        imwrite("rightRect.png", rightRect);
 
         exts.release();
         ints.release();
