@@ -73,9 +73,9 @@ int main(int argc, char** argv)
                                 pow((zvalA-zvalB), 2) );
 
         // Output distance
+        cout << "Distance = " << distance << "mm\n\n";
         ofstream distance_file;
         distance_file.open("distance.txt");
-        cout << "Distance = " << distance << "mm\n\n";
         distance_file << distance;
         distance_file.close();
 
@@ -83,7 +83,7 @@ int main(int argc, char** argv)
 //---------------------------------------------------------------------------//
 //  for whatever reason, this method seems to be worse than the previous
 
-        // Read in projection matrices 
+        // Read in projection matrices from the extrinsic parameters file
         Mat P1, P2;
         exts["P1"] >> P1;
         exts["P2"] >> P2;
