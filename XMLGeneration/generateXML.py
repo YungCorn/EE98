@@ -1,5 +1,5 @@
 def generate():
-    f = open("calibPics.xml", 'w')
+    f = open("XMLGeneration/calibPics.xml", 'w')
     
     start = ("<?xml version=\"1.0\"?>\
              \n<opencv_storage>\

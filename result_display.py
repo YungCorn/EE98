@@ -15,8 +15,8 @@ scaling_factor = 0.7
 canvas_width = int(pic_width * scaling_factor)
 canvas_height = int(pic_height * scaling_factor)
 
-left_pic = "leftRect.png"
-right_pic = "rightRect.png"
+left_pic = "user_pictures_rect/leftRect.png"
+right_pic = "user_pictures_rect/rightRect.png"
 root = Tk()
 canvas = Canvas(root, width=canvas_width, height=canvas_height)
 canvas.pack()
@@ -69,7 +69,7 @@ def display_image():
     text_x = text_x + add_x
     text_y = text_y + add_y
     canvas.create_text(text_x, text_y, font=("Purisa",25),\
-                        fill="white", text= "Distance = %s mm"%distance)
+                        fill="green", text= "Distance = %s mm"%distance)
     
     
     canvas.create_text(150, 30, font=("Purisa",25),\

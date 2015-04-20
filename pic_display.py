@@ -7,6 +7,7 @@ import math
 import os
 import sys
 
+# add in the zoom box before point selection
 
 pic_width = 1680
 pic_height = 1050
@@ -14,8 +15,8 @@ scaling_factor = 0.7
 canvas_width = int(pic_width * scaling_factor)
 canvas_height = int(pic_height * scaling_factor)
 
-left_pic = "leftRect.png"
-right_pic = "rightRect.png"
+left_pic = "user_pictures_rect/leftRect.png"
+right_pic = "user_pictures_rect/rightRect.png"
 root = Tk()
 canvas = Canvas(root, width=canvas_width, height=canvas_height)
 canvas.pack()

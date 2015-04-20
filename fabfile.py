@@ -18,18 +18,18 @@ def start_slave():
 
 def take_one_pic():
     # run with 'fab -H <IP ADDRESS OF MASTER> take_one_pic'
-    with cd('~/Documents/PythonTests/'):
+    with cd('~/Documents/stereo_cam_MASTER/'):
         run('sudo python take_one_pic.py')
 
 
 def get_master_pic():
     # run with 'fab -H <IP ADDRESS OF MASTER> get_master_pic'
-    get('~/Documents/PythonTests/user_pic/left.png','user_pictures/left.png')
+    get('~/Documents/stereo_cam_MASTER/user_pic/left.png','user_pictures_raw/left.png')
 
 
 def get_slave_pic():
     # run with 'fab -H <IP ADDRESS OF SLAVE> get_master_pic'
-    get('~/Documents/python/user_pic/right.png','user_pictures/right.png')
+    get('~/Documents/stereo_cam_SLAVE/user_pic/right.png','user_pictures_raw/right.png')
 
 def kill_slave():
     # run with 'fab -H <IP ADDRESS OF MASTER>  kill_slave' (this is not a mistake, you
