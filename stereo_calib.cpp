@@ -325,9 +325,6 @@ static void StereoCalib(const vector<string>& imagelist, Size boardSize,
         else
             for( j = 0; j < canvas.cols; j += 16 )
                 line(canvas, Point(j, 0), Point(j, canvas.rows), Scalar(0, 255, 0), 1, 8);
-        char buf[100];
-        sprintf(buf, "%dRectImg.png", i);
-        imwrite(buf, canvas);
         imshow("rectified", canvas);
         char c = (char)waitKey();
         if( c == 27 || c == 'q' || c == 'Q' )
