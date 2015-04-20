@@ -1,3 +1,0 @@
-/Users/bradleyfrizzell/Documents/Tufts Semesters/Spring Semester 2015/EE98/Platinum/EE98/OpenCV_Components/CMakeFiles/find_dist.dir
-/Users/bradleyfrizzell/Documents/Tufts Semesters/Spring Semester 2015/EE98/Platinum/EE98/OpenCV_Components/CMakeFiles/stereo_calib.dir
-/Users/bradleyfrizzell/Documents/Tufts Semesters/Spring Semester 2015/EE98/Platinum/EE98/OpenCV_Components/CMakeFiles/stereo_rect.dir
