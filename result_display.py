@@ -11,16 +11,18 @@ import sys
 
 pic_width = 1680
 pic_height = 1050
-scaling_factor = 0.7
+scaling_factor = 0.7 # This scales the picture down to display it, because it is too big
+                     # for my macbook's screen
 canvas_width = int(pic_width * scaling_factor)
 canvas_height = int(pic_height * scaling_factor)
 
 left_pic = "user_pictures_rect/leftRect.png"
 right_pic = "user_pictures_rect/rightRect.png"
+
+
 root = Tk()
 canvas = Canvas(root, width=canvas_width, height=canvas_height)
 canvas.pack()
-
 image_list = []
     
 def display_image():
@@ -36,7 +38,8 @@ def display_image():
         coords = f.readlines()
     c = coords[0].split()
     print c
-    
+ 
+    # Draw the measurement line the user had selected in pic_display
     canvas.create_rectangle(int(c[0])*scaling_factor-5,
                             int(c[1])*scaling_factor-5,
                             int(c[0])*scaling_factor+5,
@@ -52,7 +55,10 @@ def display_image():
                         int(c[2])*scaling_factor,
                         int(c[3])*scaling_factor,
                         fill="red", tags="line")
-    
+
+
+
+    # open up the file that pic_display wrote the answer into 
     with open("distance.txt") as dist_file:
         distance = dist_file.readlines()[0]
 
