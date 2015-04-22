@@ -15,10 +15,10 @@ using namespace std;
  * all of the point information in this order:
  *      Left image, point 1, x-coordinate
  *      Left image, point 1, y-coordinate
- *      Right image, point 1, x-coordinate
- *      Right image, point 1, y-coordinate
  *      Left image, point 2, x-coordinate
  *      Left image, point 2, y-coordinate
+ *      Right image, point 1, x-coordinate
+ *      Right image, point 1, y-coordinate
  *      Right image, point 2, x-coordinate
  *      Right image, point 2, y-coordinate
  * 
@@ -29,19 +29,19 @@ int main(int argc, char** argv)
     if(argc == 12) {
         string fname = argv[1];
         int width, height;
-        int Ax1, Ay1, Ax2, Ay2, Bx1, By1, Bx2, By2;
+        int Lx1, Ly1, Lx2, Ly2, Rx1, Ry1, Rx2, Ry2;
         
         // Take in all arguments
         width = atoi(argv[2]);
         height = atoi(argv[3]);
-        Ax1 = atoi(argv[4]);
-        Ay1 = atoi(argv[5]);
-        Ax2 = atoi(argv[6]);
-        Ay2 = atoi(argv[7]);
-        Bx1 = atoi(argv[8]);
-        By1 = atoi(argv[9]);
-        Bx2 = atoi(argv[10]);
-        By2 = atoi(argv[11]);
+        Lx1 = atoi(argv[4]);
+        Ly1 = atoi(argv[5]);
+        Lx2 = atoi(argv[6]);
+        Ly2 = atoi(argv[7]);
+        Rx1 = atoi(argv[8]);
+        Ry1 = atoi(argv[9]);
+        Rx2 = atoi(argv[10]);
+        Ry2 = atoi(argv[11]);
 
 // Primary method of calculating distance using reprojectImageTo3d
 //---------------------------------------------------------------------------//
@@ -52,25 +52,25 @@ int main(int argc, char** argv)
         exts["Q"] >> Q;
 
         // Calculate disparity between the given points
-        float dispA = Ax1 - Ax2;
-        float dispB = Bx1 - Bx2;
+        float dispA = Lx1 - Rx1;
+        float dispB = Lx2 - Rx2;
 
         // Find real-world (x,y,z) coordinates of the two points
         Mat Disp = Mat::zeros(width, height, CV_32FC1);
-        Disp.at<float>(Point(Ax1, Ay1)) = dispA;
-        Disp.at<float>(Point(Bx1, By1)) = dispB;
+        Disp.at<float>(Point(Lx1, Ly1)) = dispA;
+        Disp.at<float>(Point(Lx2, Ly2)) = dispB;
         Mat Coords(width, height, CV_32FC3, Scalar(0, 0, 0));
         reprojectImageTo3D(Disp, Coords, Q);
-        float xvalA = Coords.at<Vec3f>(Point(Ax1, Ay1))[0];
-        float yvalA = Coords.at<Vec3f>(Point(Ax1, Ay1))[1];
-        float zvalA = Coords.at<Vec3f>(Point(Ax1, Ay1))[2];
-        float xvalB = Coords.at<Vec3f>(Point(Bx1, By1))[0];
-        float yvalB = Coords.at<Vec3f>(Point(Bx1, By1))[1];
-        float zvalB = Coords.at<Vec3f>(Point(Bx1, By1))[2];
+        float xval1 = Coords.at<Vec3f>(Point(Lx1, Ly1))[0];
+        float yval1 = Coords.at<Vec3f>(Point(Lx1, Ly1))[1];
+        float zval1 = Coords.at<Vec3f>(Point(Lx1, Ly1))[2];
+        float xval2 = Coords.at<Vec3f>(Point(Lx2, Ly2))[0];
+        float yval2 = Coords.at<Vec3f>(Point(Lx2, Ly2))[1];
+        float zval2 = Coords.at<Vec3f>(Point(Lx2, Ly2))[2];
 
         // Use (x,y,z) coordinates to calculate distance
-        float distance = sqrt( pow((xvalA-xvalB), 2) + pow((yvalA-yvalB), 2) +
-                                pow((zvalA-zvalB), 2) );
+        float distance = sqrt( pow((xval1-xval2), 2) + pow((yval1-yval2), 2) +
+                                pow((zval1-zval2), 2) );
 
         // Output distance
         cout << "Distance = " << distance << "mm\n\n";
@@ -89,8 +89,8 @@ int main(int argc, char** argv)
         exts["P2"] >> P2;
 
         // Create matrices of corresponding points
-        Mat leftPoints = (Mat_<float>(2,2) << Ax1, Bx1, Ay1, By1);
-        Mat rightPoints = (Mat_<float>(2,2) << Ax2, Bx2, Ay2, By2);
+        Mat leftPoints = (Mat_<float>(2,2) << Lx1, Lx2, Ly1, Ly2);
+        Mat rightPoints = (Mat_<float>(2,2) << Rx1, Rx2, Ry1, Ry2);
 
         // Find homogeneous coordinates of the two points
         Mat hPoints, pointsH(1, 2, CV_32FC4);
@@ -109,12 +109,12 @@ int main(int argc, char** argv)
         convertPointsFromHomogeneous(pointsH, points3D);
 
         // Use (x, y, z) coordinates to calculate distance
-        float xval1 = points3D.at<Vec3f>(0, 0)[0];
-        float yval1 = points3D.at<Vec3f>(0, 0)[1];
-        float zval1 = points3D.at<Vec3f>(0, 0)[2];
-        float xval2 = points3D.at<Vec3f>(0, 1)[0];
-        float yval2 = points3D.at<Vec3f>(0, 1)[1];
-        float zval2 = points3D.at<Vec3f>(0, 1)[2];
+        xval1 = points3D.at<Vec3f>(0, 0)[0];
+        yval1 = points3D.at<Vec3f>(0, 0)[1];
+        zval1 = points3D.at<Vec3f>(0, 0)[2];
+        xval2 = points3D.at<Vec3f>(0, 1)[0];
+        yval2 = points3D.at<Vec3f>(0, 1)[1];
+        zval2 = points3D.at<Vec3f>(0, 1)[2];
         float newDist = sqrt( pow((xval1-xval2), 2) + pow((yval1-yval2), 2) +
                                 pow((zval1-zval2), 2) );
 
