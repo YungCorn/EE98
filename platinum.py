@@ -1,5 +1,4 @@
-#assure that you are on the same network as the raspberry pi's
-# Debugging - are you sure that these 
+# assure that you are on the same network as the raspberry pis
 
 import os
 
@@ -19,15 +18,18 @@ def main():
                   OpenCV_components/extrinsics.yml user_pictures_raw/left.png \
                   user_pictures_raw/right.png")
     
-        # This runs the GUI to display the pictures to the user for selection
+        # This runs the GUI to display the pictures to the user for measurement selection
         os.system("python pic_display.py")
     
-    
+        # open up the file that pic_display wrote to
+        # pass in the points to find_dist
         with open("user_pictures_rect/coords.txt") as f:
             coords = f.readlines()
         c = coords[0].split()
         os.system("./OpenCV_components/find_dist extrinsics.yml 1680 1050 {} {} {} {} {} {} {} {}".format(\
-                    c[0], c[1], c[4], c[5], c[2], c[3], c[6], c[7]))
+                    c[0], c[1], c[2], c[3], c[4], c[5], c[6], c[7]))
+                    
+        # display the result to the user           
         os.system("python result_display.py")
 
 main()
